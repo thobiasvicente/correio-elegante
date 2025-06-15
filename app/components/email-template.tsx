@@ -1,10 +1,13 @@
+import * as React from 'react';
+
+interface EmailTemplateProps {
+  message: string;
+}
 interface EmailTemplateProps {
   message: string;
 }
 
-export const CorreioEleganteEmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
-  message,
-}) => (
+export const CorreioEleganteEmailTemplate = ({message}: EmailTemplateProps) => (
   <div style={{ fontFamily: 'Arial, sans-serif', lineHeight: '1.6', color: '#333', maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
     <div style={{
       background: 'linear-gradient(135deg, #f59e0b 0%, #dc2626 25%, #16a34a 50%, #ea580c 75%, #9333ea 100%)',

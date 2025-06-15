@@ -10,7 +10,7 @@ export default function CorreioElegante() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
