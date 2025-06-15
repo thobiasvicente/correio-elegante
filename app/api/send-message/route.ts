@@ -1,45 +1,115 @@
+// app/api/send-message/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { CorreioEleganteEmailTemplate } from '../../components/email-template';
+import { CorreioEleganteEmailTemplate } from '@/app/components/email-template';
+import { ratelimit, ipRateLimit, getClientIP } from '@/lib/rate-limit';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Verificar hCaptcha
+async function verifyHCaptcha(token: string): Promise<boolean> {
+  try {
+    const response = await fetch('https://hcaptcha.com/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        secret: process.env.HCAPTCHA_SECRET_KEY!,
+        response: token,
+      }),
+    });
+
+    const data = await response.json();
+    return data.success;
+  } catch (error) {
+    console.error('Erro ao verificar hCaptcha:', error);
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { email, message } = await request.json();
+    // 1. Obter IP do cliente
+    const clientIP = getClientIP(request);
 
-    if (!email || !message) {
+    // 2. Verificar rate limiting por IP
+    const ipResult = await ipRateLimit.limit(clientIP);
+    if (!ipResult.success) {
       return NextResponse.json(
-        { message: 'Email e mensagem são obrigatórios' },
-        { status: 400 }
+          {
+            message: `Muitos emails enviados. Tente novamente em ${Math.ceil(ipResult.reset / 1000 / 60)} minutos.`,
+            error: 'rate_limit_exceeded'
+          },
+          { status: 429 }
       );
     }
 
+    // 3. Parse do body
+    const { email, message, captchaToken } = await request.json();
+
+    // 4. Validações básicas
+    if (!email || !message || !captchaToken) {
+      return NextResponse.json(
+          { message: 'Email, mensagem e verificação de segurança são obrigatórios.' },
+          { status: 400 }
+      );
+    }
+
+    // 5. Verificar hCaptcha
+    const captchaValid = await verifyHCaptcha(captchaToken);
+    if (!captchaValid) {
+      return NextResponse.json(
+          { message: 'Verificação de segurança falhou. Tente novamente.' },
+          { status: 400 }
+      );
+    }
+
+    // 6. Rate limiting por email
+    const emailResult = await ratelimit.limit(email.toLowerCase());
+    if (!emailResult.success) {
+      return NextResponse.json(
+          {
+            message: `Limite de emails atingido para este endereço. Tente novamente em ${Math.ceil(emailResult.reset / 1000 / 60)} minutos.`,
+            error: 'email_rate_limit'
+          },
+          { status: 429 }
+      );
+    }
+
+    // 7. Validação adicional do email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { message: 'Formato de email inválido' },
-        { status: 400 }
+          { message: 'Email inválido.' },
+          { status: 400 }
       );
     }
 
+    // 8. Validação da mensagem
     if (message.length > 500) {
       return NextResponse.json(
-        { message: 'Mensagem muito longa (máximo 500 caracteres)' },
-        { status: 400 }
+          { message: 'Mensagem muito longa. Máximo 500 caracteres.' },
+          { status: 400 }
       );
     }
 
-    if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY não configurada');
+    // 9. Filtro básico de conteúdo (opcional)
+    const forbiddenWords = ['spam', 'viagra', 'casino'];
+    const containsForbidden = forbiddenWords.some(word =>
+        message.toLowerCase().includes(word.toLowerCase())
+    );
+
+    if (containsForbidden) {
       return NextResponse.json(
-        { message: 'Erro de configuração do servidor' },
-        { status: 500 }
+          { message: 'Mensagem contém conteúdo não permitido.' },
+          { status: 400 }
       );
     }
 
+    // 10. Enviar email
     const { data, error } = await resend.emails.send({
-      from: 'Correio Elegante <noreply@thobias.dev>',
+      from: 'Correio Elegante <noreply@seudominio.com>',
       to: [email],
       subject: '💌 Você recebeu uma mensagem no Correio Elegante',
       react: CorreioEleganteEmailTemplate({ message }),
@@ -47,25 +117,26 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error('Erro do Resend:', error);
+      console.error('Erro ao enviar email:', error);
       return NextResponse.json(
-        { message: 'Erro ao enviar email. Tente novamente.' },
-        { status: 500 }
+          { message: 'Erro interno. Tente novamente mais tarde.' },
+          { status: 500 }
       );
     }
 
-    console.log(`Email enviado via Resend - ID: ${data?.id} - Domínio: ${email.split('@')[1]} - ${new Date().toISOString()}`);
+    // 11. Log para monitoramento (sem dados sensíveis)
+    console.log(`Email enviado com sucesso. IP: ${clientIP}, Timestamp: ${new Date().toISOString()}`);
 
-    return NextResponse.json({ 
-      message: 'Mensagem enviada com sucesso!',
-      id: data?.id,
-    });
+    return NextResponse.json(
+        { message: 'Mensagem enviada com sucesso!' },
+        { status: 200 }
+    );
 
   } catch (error) {
-    console.error('Erro ao enviar email:', error);
+    console.error('Erro na API:', error);
     return NextResponse.json(
-      { message: 'Erro interno do servidor. Tente novamente mais tarde.' },
-      { status: 500 }
+        { message: 'Erro interno do servidor.' },
+        { status: 500 }
     );
   }
 }
