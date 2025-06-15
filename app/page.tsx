@@ -80,12 +80,14 @@ export default function CorreioElegante() {
 
         <div className="relative z-10">
           <div className="container mx-auto px-4 py-20">
-            <div className="text-center mb-16">
-              <div className="flex justify-center items-center mb-8 relative">
+            <div className="text-center mb-8">
+              <div className="flex justify-center items-center mb-4 relative">
                 <Heart className="w-10 h-10 text-red-500 mr-4 float" />
                 <div className="relative">
-                  <h1 className="pb-2 text-5xl md:text-7xl font-black bg-gradient-to-r from-orange-500 via-yellow-500 to-blue-500 bg-clip-text text-transparent drop-shadow-lg">
-                    Correio Elegante - Lemit Brasil
+                  <h1 className="pb-2 text-4xl lg:text-6xl xl:text-7xl font-black bg-gradient-to-r from-orange-500 via-yellow-500 to-blue-500 bg-clip-text text-transparent drop-shadow-lg">
+                    <span className="block lg:inline whitespace-nowrap">Correio Elegante</span>
+                    <span className="hidden lg:inline"> - </span>
+                    <span className="block lg:inline">Lemit Brasil</span>
                   </h1>
                   <div className="absolute -top-2 -right-8 text-3xl animate-spin">✨</div>
                 </div>
@@ -154,7 +156,7 @@ export default function CorreioElegante() {
 
                   <div className="space-y-8">
                     <div className="relative">
-                      <label htmlFor="email" className="block text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
+                      <label htmlFor="email" className="block lg:text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
                         <Mail className="w-6 h-6 inline mr-3 text-blue-500" />
                         Para quem vai essa surpresa? 🎯
                       </label>
@@ -173,7 +175,7 @@ export default function CorreioElegante() {
                     </div>
 
                     <div className="relative">
-                      <label htmlFor="message" className="block text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
+                      <label htmlFor="message" className="block lg:text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
                         <Star className="w-6 h-6 inline mr-3 text-yellow-500" />
                         Sua mensagem do coração 💛
                       </label>
@@ -185,7 +187,7 @@ export default function CorreioElegante() {
                           placeholder="Escreva aqui sua mensagem carinhosa... Pode ser um elogio, um agradecimento, uma declaração de amizade, ou algo para alegrar o dia da pessoa! Lembre-se: pequenos gestos fazem grandes diferenças! 🌟💕"
                           rows={7}
                           maxLength={500}
-                          className="w-full px-6 py-5 text-lg border-3 border-orange-300 dark:border-orange-600 rounded-3xl focus:ring-4 focus:ring-orange-400/50 focus:border-orange-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-gray-700 dark:to-gray-700 shadow-inner"
+                          className="w-full px-6 py-5 text-lg placeholder:text-sm border-3 border-orange-300 dark:border-orange-600 rounded-3xl focus:ring-4 focus:ring-orange-400/50 focus:border-orange-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-gray-700 dark:to-gray-700 shadow-inner"
                           required
                       />
                         <div className="absolute bottom-4 right-4 text-2xl">✍️</div>
@@ -206,7 +208,7 @@ export default function CorreioElegante() {
                         type="submit"
                         disabled={!canSubmit}
                         onClick={handleSubmit}
-                        className={`w-full py-6 px-8 text-xl font-black rounded-3xl transition-all duration-300 transform relative overflow-hidden ${
+                        className={`w-full py-6 px-8 whitespace-nowrap lg:text-xl font-black rounded-3xl transition-all duration-300 transform relative overflow-hidden ${
                             canSubmit
                                 ? 'bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 hover:from-orange-500 hover:via-yellow-500 hover:to-orange-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1'
                                 : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
@@ -236,7 +238,7 @@ export default function CorreioElegante() {
             </div>
 
             {/* Seção de privacidade reformulada */}
-            <div className="max-w-5xl mx-auto mt-20">
+            <div className="max-w-5xl mx-auto mt-8">
               <div className="bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 dark:from-green-900/20 dark:via-blue-900/20 dark:to-purple-900/20 rounded-3xl p-10 border-3 border-green-300 dark:border-green-700 relative overflow-hidden"
                    style={{
                      boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.15)'
@@ -265,7 +267,7 @@ export default function CorreioElegante() {
                       </div>
                       <h3 className="font-bold text-xl mb-3 text-gray-800 dark:text-gray-200">Zero Registro</h3>
                       <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Não salvamos nenhum dado pessoal, IP ou qualquer informação que possa identificar você! 🔐
+                        Não salvamos nenhum dado pessoal, IP ou qualquer informação que possa identificar você!
                       </p>
                     </div>
 
@@ -275,7 +277,7 @@ export default function CorreioElegante() {
                       </div>
                       <h3 className="font-bold text-xl mb-3 text-gray-800 dark:text-gray-200">Envio Direto</h3>
                       <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Mensagem enviada direto para o email do destinatário! 🚀
+                        Mensagem enviada direto para o email do destinatário!
                       </p>
                     </div>
 
@@ -285,7 +287,7 @@ export default function CorreioElegante() {
                       </div>
                       <h3 className="font-bold text-xl mb-3 text-gray-800 dark:text-gray-200">Código Aberto</h3>
                       <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Transparência total! Veja exatamente como funciona em nosso repositório GitHub 👀
+                        Transparência total! Veja exatamente como funciona em nosso repositório GitHub
                       </p>
                     </div>
                   </div>
@@ -310,7 +312,7 @@ export default function CorreioElegante() {
                 <div className="flex justify-center items-center">
                   <span className="text-3xl mr-3">🎪</span>
                   <p className="text-xl font-bold text-gray-700 dark:text-gray-300">
-                    Feito com <Heart className="w-6 h-6 inline text-red-500 mx-1" /> para a campanha de decoração de setores da
+                    Este site foi feito para a campanha de decoração de setores da
                     <span className="bg-gradient-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent font-black ml-2">
                     Lemit Brasil
                   </span>
