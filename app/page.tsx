@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { Send, Mail, Shield, Github, Heart, Star, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
-import { HCaptchaComponent } from '@/app/components/HCaptchaComponent';
+import { RecaptchaComponent } from '@/app/components/RecaptchaComponent'; // MUDANÇA AQUI
 
 export default function CorreioElegante() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -42,10 +42,18 @@ export default function CorreioElegante() {
         setShowSuccess(true);
         setEmail('');
         setMessage('');
-        setCaptchaToken('');
+        setCaptchaToken(null);
         setTimeout(() => setShowSuccess(false), 5000);
       } else {
-        setError(data.message || 'Erro ao enviar mensagem. Tente novamente.');
+        // Tratamento de erros específicos
+        if (data.error === 'rate_limit_exceeded') {
+          setError(`🚫 ${data.message}`);
+        } else if (data.error === 'captcha_failed') {
+          setError('🤖 Verificação de segurança falhou. Tente resolver o CAPTCHA novamente.');
+          setCaptchaToken(null); // Reset CAPTCHA
+        } else {
+          setError(data.message || 'Erro ao enviar mensagem. Tente novamente.');
+        }
       }
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
@@ -55,18 +63,20 @@ export default function CorreioElegante() {
     }
   };
 
-  const handleCaptchaVerify = (token: string) => {
+  const handleCaptchaVerify = (token: string | null) => {
     setCaptchaToken(token);
-    setError('');
+    if (token) {
+      setError(''); // Limpar erro se CAPTCHA foi resolvido
+    }
   };
 
   const handleCaptchaExpire = () => {
-    setCaptchaToken('');
-    setError('Verificação de segurança expirou. Tente novamente.');
+    setCaptchaToken(null);
+    setError('Verificação de segurança expirou. Resolva o CAPTCHA novamente.');
   };
 
   const handleCaptchaError = () => {
-    setCaptchaToken('');
+    setCaptchaToken(null);
     setError('Erro na verificação de segurança. Tente novamente.');
   };
 
@@ -233,11 +243,20 @@ export default function CorreioElegante() {
                       </div>
                     </div>
 
-                    <HCaptchaComponent
+                    <RecaptchaComponent
                         onVerify={handleCaptchaVerify}
                         onExpire={handleCaptchaExpire}
                         onError={handleCaptchaError}
                     />
+
+                    {captchaToken && (
+                        <div className="text-center">
+                          <p className="text-green-600 dark:text-green-400 font-medium flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 mr-2" />
+                            ✅ Verificação de segurança concluída
+                          </p>
+                        </div>
+                    )}
 
                     <button
                         type="submit"
